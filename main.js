@@ -23,6 +23,7 @@ templateHTML = (title, list, body) => {
             <body>
                 <h1><a href = '/'>WEB</a></h1>
                 ${list}
+                <a href="/create">create</a>
                 ${body}
             </body>
             </html>`;
@@ -36,31 +37,41 @@ const app = http.createServer((request, response) => {
     const pathname = url.parse(_url, true).pathname;
 
     pathname === '/'? (
-    queryData.id === undefined ?
-    (
-        fs.readdir(`data`, (err, filelist) => {
-            title = 'Welcome';
-            const description = 'Hello nodejs';
-            const list = templateList(filelist);
+        queryData.id === undefined ? (
+            fs.readdir(`data`, (err, filelist) => {
+                title = 'Welcome';
+                const description = 'Hello nodejs';
+                const list = templateList(filelist);
 
-            const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
-            response.writeHead(200);
-            response.end(template);
-    })
-    ) :
-    (
+                const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+                response.writeHead(200);
+                response.end(template);
+        })
+        ) 
+        : (
+            fs.readdir('data', (err, filelist) => {
+                fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
+                const list = templateList(filelist);
+
+                const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+                response.writeHead(200);
+                response.end(template);
+            })
+            })
+            ))
+    : pathname === '/create' ? (
         fs.readdir('data', (err, filelist) => {
-            fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
-            const list = templateList(filelist);
-
-            const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+            const list =templateList(filelist);
+            title = 'WEB - create';
+            const template = templateHTML(title,list,`<form action ="/create_process" method = "post">
+            <p><input type = "text" name = "title" placeholder = "title"></p>
+            <p><textarea name = "description" placeholder = "description"></textarea></p>
+            <p><input type = "submit"></p></form>`);
             response.writeHead(200);
             response.end(template);
         })
-        })
-        ))
-       :
-    (
+    ) 
+    :(
         response.writeHead(404),
         response.end('not found')
     )
