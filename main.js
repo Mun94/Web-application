@@ -2,33 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const qs = require('querystring');
-
-templateList = filelist => {
-    let list = "<ul>";
-    for(let i=0; i<filelist.length; i++)
-    {
-        list = list + `<li><a href = "/?id=${filelist[i]}">${filelist[i]}</a></li>`
-    }
-    list = list + "</ul>";
-    return list;
-}
-
-templateHTML = (title, list, control, body) => {
-    return `<!doctype html>
-            <html>
-            <head>
-                <meta charset = "utf-8">
-                <title>${title} page</title>
-            <head>
-
-            <body>
-                <h1><a href = '/'>WEB</a></h1>
-                ${list}
-                ${control}
-                ${body}
-            </body>
-            </html>`;
-}
+const template = require(`./lib/template.js`);
 
 const app = http.createServer((request, response) => {
     const _url = request.url;
@@ -40,49 +14,49 @@ const app = http.createServer((request, response) => {
     let list = "";
     let description = "";
     let body = "";
-    let template = "";
+    let html = "";
 
     pathname === '/'? (
         queryData.id === undefined ? (
             fs.readdir(`data`, (err, filelist) => {
                 title = 'Welcome';
                 description = 'Hello nodejs';
-                list = templateList(filelist);
+                list = template.List(filelist);
 
-                template = templateHTML(title, list,
+                html = template.HTML(title, list,
                 `<a href = "/create">create</a>`, `<h2>${title}</h2>${description}`);
                 response.writeHead(200);
-                response.end(template);
+                response.end(html);
         })
         ) 
         : (
             fs.readdir('data', (err, filelist) => {
                 fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
-                list = templateList(filelist);
+                list = template.List(filelist);
 
-                template = templateHTML(title, list,`<a href = "/create">create</a>
+                html = template.HTML(title, list,`<a href = "/create">create</a>
                  <a href = "/update?id=${title}">update</a>
                  <form action = "/delete_process" method = "post" onsubmit="return confirm('do you want to delete this file?')">
                  <p><input type = "hidden" name="id" value="${title}"></p>
                  <p><input type="submit" value="delete"></p></form>
                  `, `<h2>${title}</h2>${description}`);
                 response.writeHead(200);
-                response.end(template);
+                response.end(html);
             })
             })
             ))
     : pathname === '/create' ? (
         fs.readdir('data', (err, filelist) => {
-            list =templateList(filelist);
+            list =template.List(filelist);
             title = 'WEB - create';
-            template = templateHTML(title,list,``,`
+            html = template.HTML(title,list,``,`
             <h2>create</h2>
             <form action ="/create_process" method = "post">
             <p><input type = "text" name = "title" placeholder = "title"></p>
             <p><textarea name = "description" placeholder = "description"></textarea></p>
             <p><input type = "submit"></p></form>`);
             response.writeHead(200);
-            response.end(template);
+            response.end(html);
         })
     ) : pathname === '/create_process' ? (
         request.on('data', data => {
@@ -100,9 +74,9 @@ const app = http.createServer((request, response) => {
     ) : pathname === '/update' ? (
         fs.readdir('data', (err, filelist) => {
             fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
-                list = templateList(filelist);
+                list = template.List(filelist);
                 title = queryData.id;
-                template = templateHTML(title, list, `<h2>update</h2>
+                html = template.HTML(title, list, `<h2>update</h2>
                 <form action = "/update_process" method = "post">
                 <input type = "hidden" name = "id" value = "${title}">
                 <p><input type = "text" name = "title" value = "${title}"></p>
@@ -110,7 +84,7 @@ const app = http.createServer((request, response) => {
                 <p><input type = "submit"></p></form>
                 `,``);
                 response.writeHead(200);
-                response.end(template);
+                response.end(html);
             })
         })
     ) : pathname === '/update_process' ? (
