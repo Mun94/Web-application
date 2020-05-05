@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const url = require('url');
+const qs = require('querystring');
 
 templateList = filelist => {
     let list = "<ul>";
@@ -32,18 +33,23 @@ templateHTML = (title, list, body) => {
 const app = http.createServer((request, response) => {
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
-    let title = queryData.id;
     console.log(url.parse(_url, true));
     const pathname = url.parse(_url, true).pathname;
+    
+    let title = queryData.id;
+    let list = "";
+    let description = "";
+    let body = "";
+    let template = "";
 
     pathname === '/'? (
         queryData.id === undefined ? (
             fs.readdir(`data`, (err, filelist) => {
                 title = 'Welcome';
-                const description = 'Hello nodejs';
-                const list = templateList(filelist);
+                description = 'Hello nodejs';
+                list = templateList(filelist);
 
-                const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+                template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
                 response.writeHead(200);
                 response.end(template);
         })
@@ -51,9 +57,9 @@ const app = http.createServer((request, response) => {
         : (
             fs.readdir('data', (err, filelist) => {
                 fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
-                const list = templateList(filelist);
+                list = templateList(filelist);
 
-                const template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+                template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
                 response.writeHead(200);
                 response.end(template);
             })
@@ -61,16 +67,29 @@ const app = http.createServer((request, response) => {
             ))
     : pathname === '/create' ? (
         fs.readdir('data', (err, filelist) => {
-            const list =templateList(filelist);
+            list =templateList(filelist);
             title = 'WEB - create';
-            const template = templateHTML(title,list,`<form action ="/create_process" method = "post">
+            template = templateHTML(title,list,`<form action ="/create_process" method = "post">
             <p><input type = "text" name = "title" placeholder = "title"></p>
             <p><textarea name = "description" placeholder = "description"></textarea></p>
             <p><input type = "submit"></p></form>`);
             response.writeHead(200);
             response.end(template);
         })
-    ) 
+    ) : pathname === '/create_process' ? (
+        request.on('data', data => {
+            body = body + data;
+        }),
+        request.on('end', () => {
+            let post = qs.parse(body);
+            title = post.title;
+            description = post.description;
+            fs.writeFile(`data/${title}`, description, 'utf8', err => {
+                response.writeHead(302,{Location : `/?id=${title}`});
+                response.end();
+            })
+        })
+    )
     :(
         response.writeHead(404),
         response.end('not found')
