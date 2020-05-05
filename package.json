@@ -1,0 +1,25 @@
+{
+  "name": "node.js-2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mun94/Web-application.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mun94/Web-application/issues"
+  },
+  "homepage": "https://github.com/Mun94/Web-application#readme",
+  "dependencies": {
+    "sanitize-html": "^1.23.0"
+  }
+}
