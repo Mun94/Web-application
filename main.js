@@ -60,7 +60,12 @@ const app = http.createServer((request, response) => {
                 fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
                 list = templateList(filelist);
 
-                template = templateHTML(title, list,`<a href = "/create">create</a> <a href = "/update?id=${title}">update</a>`, `<h2>${title}</h2>${description}`);
+                template = templateHTML(title, list,`<a href = "/create">create</a>
+                 <a href = "/update?id=${title}">update</a>
+                 <form action = "/delete_process" method = "post" onsubmit="return confirm('do you want to delete this file?')">
+                 <p><input type = "hidden" name="id" value="${title}"></p>
+                 <p><input type="submit" value="delete"></p></form>
+                 `, `<h2>${title}</h2>${description}`);
                 response.writeHead(200);
                 response.end(template);
             })
@@ -124,7 +129,20 @@ const app = http.createServer((request, response) => {
                 })
             })
         })
-    )
+    ) : pathname === '/delete_process' ? (
+        request.on('data', data => {
+            body += data;
+        }),
+        request.on('end', () => {
+            let post = qs.parse(body);
+            let id = post.id;
+
+            fs.unlink(`data/${id}`, err => {
+                response.writeHead(302, {Location:`/`});
+                response.end();
+            })
+        })
+    ) 
     :(
         response.writeHead(404),
         response.end('not found')
