@@ -172,7 +172,7 @@ const app = http.createServer((request, response) => {
                     html = MySQLTem.HTML(title, list,
                     `<a href = "/MySQL/create">create</a>
                     <a href = "/MySQL/update?id=${queryData.id}">update</a>'
-                    <form action = "/MySQL/delete_process" method="post">
+                    <form action = "/MySQL/delete_process" method="post" onsubmit="return confirm('do you want to delete this file?')">
                         <input type ="hidden" name = "id" value="${queryData.id}">
                         <input type ="submit" value="delete">
                     </form>
@@ -245,10 +245,21 @@ const app = http.createServer((request, response) => {
             body += data;
         }),
         request.on('end', ()=>{
-            post = qs.parse(body);
+            let post = qs.parse(body);
             console.log(post);
             db.query(`update topic set title = ?, description = ?, author_id = ? where topic.id = ?`, [post.title, post.description, post.author, post.id], (err, result) => {
                 response.writeHead(302, {Location: `/?id=${post.id}`});
+                response.end();
+            })
+        })
+    ) : pathname === `/MySQL/delete_process` ? (
+        request.on('data', data => {
+            body += data;
+        }),
+        request.on('end', () => {
+            let post = qs.parse(body);
+            db.query(`delete from topic where id = ?`, [post.id], (err, result)=>{
+                response.writeHead(302, {Location:`/MySQL`})
                 response.end();
             })
         })
