@@ -4,6 +4,8 @@ const url = require('url');
 const qs = require('querystring');
 const template = require(`./lib/template.js`);
 const sanitizeHtml = require('sanitize-html');
+const MySQLTem = require(`./lib/MySQLTem.js`);
+const db = require(`./lib/db.js`);
 
 const app = http.createServer((request, response) => {
     const _url = request.url;
@@ -125,7 +127,65 @@ const app = http.createServer((request, response) => {
             })
         })
     ) 
-    :(
+    
+    : pathname === '/MySQL' ? (
+        queryData.id === undefined ? (db.query(`select * from topic`, (err, topics) => {
+            checkError = (err) => {
+                if(err) throw `topics error 확인 바람`;
+                else{
+                    title = 'welcome';
+                    description = 'hello, mysql';
+                    list = MySQLTem.List(topics);
+                    html = template.HTML(title, list, `<a href="/create">create</a>`, `<h2>${title}</h2>${description}`);
+                    response.writeHead(200);
+                    response.end(html);
+                }
+            }
+            try{
+                checkError(err);
+            } catch(e) {
+                response.end(`에러 발생 >>> ${e}`);
+                console.log(`에러가 발생했습니다. >>> ${e}`);
+            } finally {
+                console.log('완료');
+            } 
+        }))       
+        :(db.query(`select * from topic`, (err, topics) => {
+            checkError = (err) => {
+                if(err) throw `topics error 확인 바람`;}
+                try{
+                    checkError(err);
+                } catch(e) {
+                    response.end(`에러 발생 >>> ${e}`);
+                    console.log(`에러가 발생했습니다. >>> ${e}`);
+                } finally {
+                    console.log('완료');
+                } 
+            db.query(`select * from topic where id = ?`, [queryData.id], (err2, topic) => {
+                checkError = (err2) => {if(err2) throw `topic error 확인 바람`
+                else{
+                    console.log(topic);
+
+                    const sanitizedTitle = sanitizeHtml(topic[0].title);
+                    const sanitizedDescription = sanitizeHtml(topic[0].description);
+                    list = MySQLTem.List(topics);
+                    html = MySQLTem.HTML(title, list,
+                    `<a href = "/create">create</a>`, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`);
+                    response.writeHead(200);
+                    response.end(html);
+                }}
+                try{
+                    checkError(err2);
+                } catch(e) {
+                    response.end(`에러 발생 >>> ${e}`);
+                    console.log(`에러가 발생했습니다. >>> ${e}`);
+                } finally {
+                    console.log('완료');
+                } 
+            })
+        })
+    ))
+    : (
         response.writeHead(404),
         response.end('not found')
     )
