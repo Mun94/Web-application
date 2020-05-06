@@ -221,10 +221,41 @@ const app = http.createServer((request, response) => {
                response.end();
            })
         })
+    ) : pathname === '/MySQL/update' ? (
+        db.query(`select * from topic`, (err, topics) => {
+        db.query(`select * from topic where id = ?`, [queryData.id], function(err2, topic){
+        db.query(`select * from author`, (err3, authors)=>{
+            list = MySQLTem.List(topics);
+            html = MySQLTem.HTML(topic[0].title, list, `<a href="/MySQL/create">create</a> <a href = "/MySQL/update?id=${topic[0].id}">update</a>`,`
+            <form action ="/MySQL/update_process" method="post">
+            <input type = "hidden" name = "id" value = "${topic[0].id}">
+            <p><input type = "text" name = "title" value = "${topic[0].title}"></p>
+            <p><textarea name = "description">${topic[0].description}</textarea></p>
+            <p>${MySQLTem.authorSelect(authors, topic[0].author_id)}</p>
+            <p><input type ="submit"></p>
+            </form>
+            `);
+        response.writeHead(200);
+        response.end(html);
+        })
+        })
+    }))
+    : pathname === '/MySQL/update_process' ? (
+        request.on('data', data => {
+            body += data;
+        }),
+        request.on('end', ()=>{
+            post = qs.parse(body);
+            console.log(post);
+            db.query(`update topic set title = ?, description = ?, author_id = ? where topic.id = ?`, [post.title, post.description, post.author, post.id], (err, result) => {
+                response.writeHead(302, {Location: `/?id=${post.id}`});
+                response.end();
+            })
+        })
     )
     :(
         response.writeHead(404),
         response.end('not found')
     )
 })
-app.listen(4000);
+app.listen(4000); 
