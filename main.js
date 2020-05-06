@@ -127,7 +127,7 @@ const app = http.createServer((request, response) => {
             })
         })
     ) 
-    
+
     : pathname === '/MySQL' ? (
         queryData.id === undefined ? (db.query(`select * from topic`, (err, topics) => {
             checkError = (err) => {
@@ -136,7 +136,7 @@ const app = http.createServer((request, response) => {
                     title = 'welcome';
                     description = 'hello, mysql';
                     list = MySQLTem.List(topics);
-                    html = template.HTML(title, list, `<a href="/create">create</a>`, `<h2>${title}</h2>${description}`);
+                    html = template.HTML(title, list, `<a href="/MySQL/create">create</a>`, `<h2>${title}</h2>${description}`);
                     response.writeHead(200);
                     response.end(html);
                 }
@@ -161,8 +161,8 @@ const app = http.createServer((request, response) => {
                 } finally {
                     console.log('완료');
                 } 
-            db.query(`select * from topic where id = ?`, [queryData.id], (err2, topic) => {
-                checkError = (err2) => {if(err2) throw `topic error 확인 바람`
+            db.query(`select * from topic left join author on topic.author_id = author.id where topic.id = ?`, [queryData.id], (err2, topic) => {
+                if(err2) throw `topic error 확인 바람`
                 else{
                     console.log(topic);
 
@@ -170,10 +170,16 @@ const app = http.createServer((request, response) => {
                     const sanitizedDescription = sanitizeHtml(topic[0].description);
                     list = MySQLTem.List(topics);
                     html = MySQLTem.HTML(title, list,
-                    `<a href = "/create">create</a>`, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`);
+                    `<a href = "/MySQL/create">create</a>
+                    <a href = "/MySQL/update?id=${queryData.id}">update</a>'
+                    <form action = "/MySQL/delete_process" method="post">
+                        <input type ="hidden" name = "id" value="${queryData.id}">
+                        <input type ="submit" value="delete">
+                    </form>
+                    `, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}<p>by ${topic[0].name}</p>`);
                     response.writeHead(200);
                     response.end(html);
-                }}
+                }
                 try{
                     checkError(err2);
                 } catch(e) {
@@ -184,8 +190,39 @@ const app = http.createServer((request, response) => {
                 } 
             })
         })
-    ))
-    : (
+    )) : pathname === '/MySQL/create' ? 
+    (db.query(`select * from topic`, (err, topics) => {
+        db.query(`select * from author`, (err2, authors) => {
+            title = 'create';
+            list = MySQLTem.List(topics);
+            html = MySQLTem.HTML(title, list,`<a href=/MySQL/create">create</a>` ,`<form action = "/MySQL/create_process" method = "post">
+            <p><input type = "text" name = "title" placeholder = "title"></p>
+            <p>
+                <textarea name = "description" placeholder = "description"></textarea>
+            </p>
+            <p> ${MySQLTem.authorSelect(authors)}</p>
+            <p><input type="submit"></p>
+            </form>
+            `);
+            response.writeHead(200);
+            response.end(html);
+        })
+    }))   
+    : pathname === '/MySQL/create_process' ? (
+        request.on('data', data => {
+            body += data;
+        }),
+        request.on('end', ()=>{
+           let post = qs.parse(body);
+            console.log(post);
+           db.query(`insert into topic (title, description, created, author_id) values (?, ?, now(), ?)`, [post.title, post.description, post.author], (err, result) => {
+               console.log(result);
+               response.writeHead(302, {Location: `/MySQL?id=${result.insertId}`});
+               response.end();
+           })
+        })
+    )
+    :(
         response.writeHead(404),
         response.end('not found')
     )
