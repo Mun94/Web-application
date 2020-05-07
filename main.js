@@ -33,9 +33,13 @@ app.get('/', (request, response) => {
         response.send(html);
 });
 
-app.get('/page/:pageId', (request, response) => {
+app.get('/page/:pageId', (request, response, next) => {
         const filteredId = path.parse(request.params.pageId).base;
-        fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
+        fs.readFile(`data/${filteredId}`, 'utf8', (err2, description) => {
+            if(err2){
+                next(err2);
+            }
+            else{
         title = request.params.pageId
         list = template.List(request.list);
 
@@ -54,7 +58,7 @@ app.get('/page/:pageId', (request, response) => {
          `, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`);
         
          response.send(html);
-    })
+        }})
 })
 
 app.get('/create', (request, response) => {
@@ -117,6 +121,26 @@ app.post(`/delete_process`, (request, response) => {
             response.redirect(`/`);
         })
     })
+
+app.use((req,res,next) => {
+    res.status(404).send('sorry');
+});
+
+app.use((err2,req,res,next) => {
+    // console.error(err2.stack)
+    // res.status(500).send('broke!')
+    checkError = (err2) => {
+        if(err2) throw `topics err2or 확인 바람`;}
+        try{
+            checkError(err2);
+        } catch(e) {
+            res.status(500).send(`에러 발생 >>> ${e}`);
+            console.log(`에러가 발생했습니다. >>> ${e}`);
+            console.error(err2.stack);
+        } finally {
+            console.log('완료');
+        } 
+});
 
 app.listen(4000, ()=>{
     console.log(`app listening on port 4000!`);
