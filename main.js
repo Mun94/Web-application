@@ -52,6 +52,37 @@ app.get('/page/:pageId', (request, response) => {
     })
 })
 
+app.get('/create', (request, response) => {
+    fs.readdir('./data', (err, filelist) => {
+        list =template.List(filelist);
+        title = 'WEB - create';
+        html = template.HTML(title,list,``,`
+        <h2>create</h2>
+        <form action ="/create_process" method = "post">
+        <p><input type = "text" name = "title" placeholder = "title"></p>
+        <p><textarea name = "description" placeholder = "description"></textarea></p>
+        <p><input type = "submit"></p></form>`);
+        
+        response.send(html);
+    })
+})
+
+app.post(`/create_process`, (request, response) => {
+    let body = '';
+    request.on('data', data => {
+        body = body + data;
+    }),
+    request.on('end', () => {
+        let post = qs.parse(body);
+        title = post.title;
+        description = post.description;
+        fs.writeFile(`data/${title}`, description, 'utf8', err => {
+            response.writeHead(302,{Location : `/page/${title}`});
+            response.end();
+        })
+    })
+})
+
 app.listen(4000, ()=>{
     console.log(`app listening on port 4000!`);
 })
