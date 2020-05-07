@@ -2,12 +2,20 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
-const qs = require('querystring');
 const template = require(`./lib/template.js`);
 const bodyParser = require('body-parser');
 const sanitizeHtml = require('sanitize-html');
+const compression = require('compression');
 
-app.use(bodyParser.urlencoded({ extended : false}));
+app.use(compression());
+
+app.post('*',bodyParser.urlencoded({ extended : false}));
+app.get('*', (request, response, next) => {
+    fs.readdir('./data', (err, filelist) => {
+        request.list = filelist;
+        next();
+    });
+});
 
 let title ='';
 let description = '';
@@ -15,24 +23,21 @@ let list = '';
 let html ='';
 
 app.get('/', (request, response) => {
-    fs.readdir(`data`, (err, filelist) => {
         title = 'Welcome';
         description = 'Hello nodejs';
-        list = template.List(filelist);
+        list = template.List(request.list);
 
         html = template.HTML(title, list,
         `<a href = "/create">create</a>`, `<h2>${title}</h2>${description}`);
         
         response.send(html);
-})
 });
 
 app.get('/page/:pageId', (request, response) => {
-    fs.readdir('data', (err, filelist) => {
         const filteredId = path.parse(request.params.pageId).base;
         fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
         title = request.params.pageId
-        list = template.List(filelist);
+        list = template.List(request.list);
 
         const sanitizedTitle = sanitizeHtml(title);
         const sanitizedDescription = sanitizeHtml(description, {
@@ -50,12 +55,10 @@ app.get('/page/:pageId', (request, response) => {
         
          response.send(html);
     })
-    })
 })
 
 app.get('/create', (request, response) => {
-    fs.readdir('./data', (err, filelist) => {
-        list =template.List(filelist);
+        list =template.List(request.list);
         title = 'WEB - create';
         html = template.HTML(title,list,``,`
         <h2>create</h2>
@@ -66,7 +69,6 @@ app.get('/create', (request, response) => {
         
         response.send(html);
     })
-})
 
 app.post(`/create_process`, (request, response) => {
         let post = request.body;
@@ -79,10 +81,9 @@ app.post(`/create_process`, (request, response) => {
 
 
 app.get(`/update/:pageId`, (request, response) => {
-    fs.readdir('data', (err, filelist) => {
         const filteredId = path.parse(request.params.pageId).base;
         fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
-            list = template.List(filelist);
+            list = template.List(request.list);
             title = request.params.pageId;
             html = template.HTML(title, list, `<h2>update</h2>
             <form action = "/update_process" method = "post">
@@ -94,7 +95,6 @@ app.get(`/update/:pageId`, (request, response) => {
             
             response.send(html);
         })
-    })
 })
 app.post(`/update_process`, (request, response) => {
         let post = request.body;
