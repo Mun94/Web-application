@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Mun94/Web-application#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "sanitize-html": "^1.23.0"
   }
 }
