@@ -58,6 +58,9 @@ const app = http.createServer((request, response) => {
     :pathname === `/MySQL/authors/update_process` ? (
         author.author_update_process(request, response)
     )
+    :pathname === `/MySQL/authors/delete_process`? (
+        author.author_delete_process(request, response)
+    )
     :(
         response.writeHead(404),
         response.end('not found')
