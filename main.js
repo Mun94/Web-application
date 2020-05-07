@@ -118,6 +118,21 @@ app.post(`/update_process`, (request, response) => {
     })
 })
 
+app.post(`/delete_process`, (request, response) => {
+    let body = '';
+    request.on('data', data => {
+        body += data;
+    }),
+    request.on('end', () => {
+        let post = qs.parse(body);
+        let id = post.id;
+
+        fs.unlink(`data/${id}`, err => {
+            response.redirect(`/`);
+        })
+    })
+})
+
 app.listen(4000, ()=>{
     console.log(`app listening on port 4000!`);
 })
