@@ -1,3 +1,6 @@
+const express = require('express');
+const app = express();
+const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const url = require('url');
@@ -5,6 +8,54 @@ const qs = require('querystring');
 const template = require(`./lib/template.js`);
 const sanitizeHtml = require('sanitize-html');
 
+let title ='';
+let description = '';
+let list = '';
+let html ='';
+
+app.get('/', (request, response) => {
+    fs.readdir(`data`, (err, filelist) => {
+        title = 'Welcome';
+        description = 'Hello nodejss';
+        list = template.List(filelist);
+
+        html = template.HTML(title, list,
+        `<a href = "/create">create</a>`, `<h2>${title}</h2>${description}`);
+        
+        response.send(html);
+})
+});
+
+app.get('/page/:pageId', (request, response) => {
+    fs.readdir('data', (err, filelist) => {
+        const filteredId = path.parse(request.params.pageId).base;
+        fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
+        title = request.params.pageId
+        list = template.List(filelist);
+
+        const sanitizedTitle = sanitizeHtml(title);
+        const sanitizedDescription = sanitizeHtml(description, {
+            allowedTags:['h1', 'p', 'a'],
+            allowedAttributes : {
+                'a':['href']
+            }
+        })
+        html = template.HTML(title, list,`<a href = "/create">create</a>
+         <a href = "/update?id=${sanitizedTitle}">update</a>
+         <form action = "/delete_process" method = "post" onsubmit="return confirm('do you want to delete this file?')">
+         <p><input type = "hidden" name="id" value="${sanitizedTitle}"></p>
+         <p><input type="submit" value="delete"></p></form>
+         `, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`);
+        
+         response.send(html);
+    })
+    })
+})
+
+app.listen(4000, ()=>{
+    console.log(`app listening on port 4000!`);
+})
+/*
 const app = http.createServer((request, response) => {
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
@@ -130,4 +181,4 @@ const app = http.createServer((request, response) => {
         response.end('not found')
     )
 })
-app.listen(4000);
+app.listen(4000);*/
