@@ -52,6 +52,12 @@ const app = http.createServer((request, response) => {
     :pathname === `/MySQL/authors/create_process` ? (
         author.author_create_process(request, response)
     )
+    :pathname === `/MySQL/authors/update`? (
+        author.author_update(request, response)
+    )
+    :pathname === `/MySQL/authors/update_process` ? (
+        author.author_update_process(request, response)
+    )
     :(
         response.writeHead(404),
         response.end('not found')
