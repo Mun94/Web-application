@@ -73,9 +73,9 @@ router.post(`/delete_process`, (request, response) => {
 
 router.get('/:pageId', (request, response, next) => {
     const filteredId = path.parse(request.params.pageId).base;
-    fs.readFile(`data/${filteredId}`, 'utf8', (err2, description) => {
-        if(err2){
-            next(err2);
+    fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
+        if(err){
+            next(err);
         }
         else{
     title = request.params.pageId

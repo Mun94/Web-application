@@ -35,17 +35,17 @@ app.use((req,res,next) => {
     res.status(404).send('sorry');
 });
 
-app.use((err2,req,res,next) => {
+app.use((err,req,res,next) => {
     // console.error(err2.stack)
     // res.status(500).send('broke!')
-    checkError = (err2) => {
-        if(err2) throw `topics err2or 확인 바람`;}
+    checkError = (err) => {
+        if(err) throw `${err} 확인 바람`;}
         try{
-            checkError(err2);
+            checkError(err);
         } catch(e) {
             res.status(500).send(`에러 발생 >>> ${e}`);
             console.log(`에러가 발생했습니다. >>> ${e}`);
-            console.error(err2.stack);
+            console.error(err.stack);
         } finally {
             console.log('완료');
         } 
