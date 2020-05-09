@@ -7,17 +7,17 @@ const topicRouter = require('./routes/topic.js');
 const indexRouter = require(`./routes/index.js`);
 const authRouter = require(`./routes/auth.js`);
 
-//const FileStore = require(`session-file-store`)(session);
+const FileStore = require(`session-file-store`)(session);
 
 const app = express();
 
 app.use(compression());
-// app.use(session({
-//     store : new FileStore(),
-//     secret:'keyboard cat',
-//     resave: false,
-//     saveUninitialized: true
-// }))
+app.use(session({
+    store : new FileStore(),
+    secret:'keyboard cat',
+    resave: false,
+    saveUninitialized: true
+}))
 
 app.post('*',bodyParser.urlencoded({ extended : false}));
 app.get('*', (request, response, next) => {
