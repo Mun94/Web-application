@@ -14,7 +14,6 @@ router.get('/', (request, response) => {
         description = 'Hello nodejs';
         list = template.List(request.list);
 
-
         html = template.HTML(title,`${check.UI(request,response)}`, list,
         `<a href = "/create">create</a>`, `<h2>${title}</h2>${description}`);
         
