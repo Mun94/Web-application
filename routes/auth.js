@@ -21,7 +21,7 @@ router.get('/login', (request, response) => {
     `,'');
     
     response.send(html);
-})
+});
 
 router.post('/login_process', (request, response) => {
     post = request.body;
@@ -31,6 +31,12 @@ router.post('/login_process', (request, response) => {
     request.session.is_logined = true,
     request.session.nickname = pass.nickname,
     response.redirect('/')) : response.send('who?')
-})
+});
+
+router.get('/logout', (request, response) => {
+    request.session.destroy( err => {
+        response.redirect('/');
+    })
+});
 
 module.exports = router;

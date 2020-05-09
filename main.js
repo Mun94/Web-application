@@ -3,23 +3,19 @@ const session = require('express-session');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-const topicRouter = require('./routes/topic.js');
-const indexRouter = require(`./routes/index.js`);
-const authRouter = require(`./routes/auth.js`);
 
 const FileStore = require(`session-file-store`)(session);
 
 const app = express();
 
 app.use(compression());
+app.post('*',bodyParser.urlencoded({ extended : false}));
 app.use(session({
     store : new FileStore(),
     secret:'keyboard cat',
     resave: false,
     saveUninitialized: true
 }))
-
-app.post('*',bodyParser.urlencoded({ extended : false}));
 app.get('*', (request, response, next) => {
     fs.readdir('./data', (err, filelist) => {
         request.list = filelist;
@@ -27,8 +23,12 @@ app.get('*', (request, response, next) => {
     });
 });
 
-app.use('/topic', topicRouter);
+
+
+const indexRouter = require(`./routes/index.js`);
+const topicRouter = require('./routes/topic.js');const authRouter = require(`./routes/auth.js`);
 app.use('/', indexRouter);
+app.use('/topic', topicRouter);
 app.use('/auth', authRouter);
 
 app.use((req,res,next) => {
