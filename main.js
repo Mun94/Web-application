@@ -5,14 +5,14 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const pass = require('./lib2/pass.js');
 
-const FileStore = require(`session-file-store`)(session);
-
+//const FileStore = require(`session-file-store`)(session);
+const LokiStore = require('connect-loki')(session)
 const app = express();
 
 app.use(compression());
 app.use('*',bodyParser.urlencoded({ extended : false}));
 app.use(session({
-    store : new FileStore(),
+    store: new LokiStore(),
     secret:'keyboard cat',
     resave: false,
     saveUninitialized: true
