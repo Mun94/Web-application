@@ -16,13 +16,16 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }))
+
+const passport = require('passport')
+    ,  LocalStrategy = require('passport-local').Strategy;
+
 app.get('*', (request, response, next) => {
     fs.readdir('./data', (err, filelist) => {
         request.list = filelist;
         next();
     });
 });
-
 
 
 const indexRouter = require(`./routes/index.js`);
