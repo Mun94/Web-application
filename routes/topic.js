@@ -12,16 +12,18 @@ let list = '';
 let html ='';
 
 router.get('/create', (request, response) => {
-    list =template.List(request.list);
-    title = 'WEB - create';
+    !check.IS(request,response) ? 
+    response.send(`로그인이 필요합니다.<p><a href="/auth/login">login</a></p>`) : (
+    list =template.List(request.list),
+    title = 'WEB - create',
     html = template.HTML(title,`${check.UI(request,response)}`,list,``,`
     <h2>create</h2>
     <form action ="/topic/create_process" method = "post">
     <p><input type = "text" name = "title" placeholder = "title"></p>
     <p><textarea name = "description" placeholder = "description"></textarea></p>
-    <p><input type = "submit"></p></form>`);
+    <p><input type = "submit"></p></form>`),
     
-    response.send(html);
+    response.send(html))
 })
 
 router.post(`/create_process`, (request, response) => {
@@ -36,6 +38,9 @@ router.post(`/create_process`, (request, response) => {
 
 router.get(`/update/:pageId`, (request, response) => {
     const filteredId = path.parse(request.params.pageId).base;
+
+    !check.IS(request,response) ? 
+    response.send(`로그인이 필요합니다.<p><a href="/auth/login">login</a></p>`) : (
     fs.readFile(`data/${filteredId}`, 'utf8', (err, description) => {
         list = template.List(request.list);
         title = request.params.pageId;
@@ -48,7 +53,7 @@ router.get(`/update/:pageId`, (request, response) => {
         `,``);
         
         response.send(html);
-    })
+    }))
 })
 router.post(`/update_process`, (request, response) => {
     let post = request.body;
@@ -64,12 +69,15 @@ router.post(`/update_process`, (request, response) => {
 
 
 router.post(`/delete_process`, (request, response) => {
+    
     let post = request.body;
     let id = post.id;
 
+    !check.IS(request,response) ? 
+    response.send(`로그인이 필요합니다.<p><a href="/auth/login">login</a></p>`) : (
     fs.unlink(`data/${id}`, err => {
         response.redirect(`/`);
-    })
+    }))
 })
 
 router.get('/:pageId', (request, response, next) => {

@@ -27,6 +27,7 @@ app.get('*', (request, response, next) => {
 
 const indexRouter = require(`./routes/index.js`);
 const topicRouter = require('./routes/topic.js');const authRouter = require(`./routes/auth.js`);
+
 app.use('/', indexRouter);
 app.use('/topic', topicRouter);
 app.use('/auth', authRouter);
