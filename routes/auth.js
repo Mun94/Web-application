@@ -23,6 +23,7 @@ router.get('/login', (request, response) => {
     response.send(html);
 });
 
+/*
 router.post('/login_process', (request, response) => {
     post = request.body;
     console.log(post); console.log(pass);
@@ -36,6 +37,7 @@ router.post('/login_process', (request, response) => {
     })) :
      response.redirect('./loginError')
 });
+*/
 
 router.get('/logout', (request, response) => {
     request.session.destroy( err => {

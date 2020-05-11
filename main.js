@@ -3,13 +3,14 @@ const session = require('express-session');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const pass = require('./lib2/pass.js');
 
 const FileStore = require(`session-file-store`)(session);
 
 const app = express();
 
 app.use(compression());
-app.post('*',bodyParser.urlencoded({ extended : false}));
+app.use('*',bodyParser.urlencoded({ extended : false}));
 app.use(session({
     store : new FileStore(),
     secret:'keyboard cat',
@@ -18,7 +19,40 @@ app.use(session({
 }))
 
 const passport = require('passport')
-    ,  LocalStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+    {
+        usernameField : 'email',
+        passwordField : 'password' 
+    },
+    function (username, password, done) {
+        console.log('LocalStrategy', username, password);
+        if(username === pass.email) {
+            console.log(1);
+            if(password === pass.password) {
+                console.log(2);
+                return done(null, pass);}
+            else{
+            console.log(3)
+            return done(null, false, {
+                message: 'Incorrect password.'
+            });
+        }}
+        else {
+            console.log(4)
+            return done(null, false, {
+                message: 'Incorrect username'
+            })
+        }
+    }  
+  ));
+ 
+app.post('/auth/login_process',
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: './loginError'
+  }));
 
 app.get('*', (request, response, next) => {
     fs.readdir('./data', (err, filelist) => {
