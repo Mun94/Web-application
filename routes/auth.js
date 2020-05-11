@@ -30,13 +30,31 @@ router.post('/login_process', (request, response) => {
     post.email === pass.email && post.password === pass.password ? (
     request.session.is_logined = true,
     request.session.nickname = pass.nickname,
-    response.redirect('/')) : response.send('who?')
+    request.session.todayIs = Date(),
+    request.session.save( ()=>{
+        response.redirect('/')
+    })) :
+     response.redirect('./loginError')
 });
 
 router.get('/logout', (request, response) => {
     request.session.destroy( err => {
         response.redirect('/');
     })
+});
+
+router.get('/loginError', function(request, response){
+var errorPage = `
+<html>
+<head>
+<meta http-equiv="refresh" content="3;url=/" />
+</head>
+<body>
+로그인 실패 3초 후 홈페이지로 돌아갑니다.
+</body>
+</html>
+`;
+response.send(errorPage);
 });
 
 module.exports = router;
