@@ -10,6 +10,8 @@ let html ='';
 
 
 router.get('/', (request, response) => {
+        console.log('/', request.user);
+        
         title = 'Welcome';
         description = 'Hello nodejs';
         list = template.List(request.list);

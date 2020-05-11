@@ -40,7 +40,11 @@ router.post('/login_process', (request, response) => {
 */
 
 router.get('/logout', (request, response) => {
-    request.session.destroy( err => {
+    request.logout();
+    // request.session.destroy( err => {
+    //     response.redirect('/');
+    // })
+    request.session.save(function() {
         response.redirect('/');
     })
 });
