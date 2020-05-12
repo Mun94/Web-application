@@ -4,6 +4,7 @@ const template = require('../lib/template.js');
 const check = require('../lib/check.js');
 const shortid = require('shortid');
 const db = require('../lib/db.js');
+const bcrypt = require('bcrypt');
 
 let title = "";
 let list = "";
@@ -63,16 +64,18 @@ router.post(`/register_process`, (request, response) => {
         response.redirect('/auth/register');
     }
     else {
-     const user = {
-        id : shortid.generate(),
-        email : email,
-        password : password,
-        displayName : displayName
-     };
-     db.get('users').push(user).write();
-    request.login(user, function(err) {
-        return response.redirect('/')
-    })
+     bcrypt.hash(password, 10, function(err, hash) {
+        const user = {
+            id : shortid.generate(),
+            email : email,
+            password : hash,
+            displayName : displayName
+         };
+         db.get('users').push(user).write();
+        request.login(user, function(err) {
+            return response.redirect('/')
+        })
+     })
     }
 });
 
