@@ -50,13 +50,16 @@ router.get('/logout', (request, response) => {
 });
 
 router.get('/loginError', function(request, response){
+    let aaaa = request.flash().error;
+    console.log(aaaa);
 var errorPage = `
 <html>
 <head>
-<meta http-equiv="refresh" content="3;url=/" />
+<meta http-equiv="refresh" content="5;url=/auth/login">
 </head>
 <body>
-로그인 실패 3초 후 홈페이지로 돌아갑니다.
+<div style="color:red">${aaaa.shift()}</div>
+로그인 실패 5초 후 로그인 페이지로 돌아갑니다.
 </body>
 </html>
 `;

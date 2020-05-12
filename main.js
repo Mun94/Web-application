@@ -4,7 +4,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const pass = require('./lib2/pass.js');
-
+const flash = require('connect-flash');
 //const FileStore = require(`session-file-store`)(session);
 const LokiStore = require('connect-loki')(session)
 const app = express();
@@ -17,6 +17,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }))
+app.use(flash());
 
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy;
@@ -24,7 +25,8 @@ const LocalStrategy = require('passport-local').Strategy;
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function(request, user, done) {
+    request.session.num ===undefined ? request.session.num = 1 : request.session.num +=1
     console.log('serializeUser', user);
     done(null, user.email);
 });
@@ -63,7 +65,8 @@ passport.use(new LocalStrategy(
 app.post('/auth/login_process',
   passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: './loginError'
+    failureRedirect: './loginError',
+    failureFlash:true
   }));
 
 app.get('*', (request, response, next) => {
