@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const template = require('../lib/template.js');
 const check = require('../lib/check.js');
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+const adapter = new FileSync('db.json');
+const db = low(adapter);
+db.defaults({users:[]}).write();
 
 let title = "";
 let list = "";
@@ -41,6 +46,21 @@ router.get('/register', (request, response) => {
     `,'');
     
     response.send(html);
+});
+
+router.post(`/register_process`, (request, response) => {
+    let post = request.body;
+    let email = post.email;
+    let password = post.password;
+    let password2 = post.password2;
+    let displayName = post.displayName;
+
+    db.get('users').push({
+        email : email,
+        password : password,
+        displayName : displayName
+    }).write();
+    response.redirect('/');
 });
 
 router.get('/logout', (request, response) => {
