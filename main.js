@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const pass = require('./lib2/pass.js');
 const flash = require('connect-flash');
-//const FileStore = require(`session-file-store`)(session);
+const db = require('./lib/db.js');
+
 const LokiStore = require('connect-loki')(session)
 const app = express();
 
@@ -22,10 +23,11 @@ app.use(flash());
 const passport = require('./lib/passport.js')(app);
 
 app.get('*', (request, response, next) => {
-    fs.readdir('./data', (err, filelist) => {
-        request.list = filelist;
+    request.list = db.get('topics').value();
+    // fs.readdir('./data', (err, filelist) => {
+    //     request.list = filelist;
         next();
-    });
+    //});
 });
 
 const indexRouter = require(`./routes/index.js`);
