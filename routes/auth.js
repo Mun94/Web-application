@@ -2,12 +2,8 @@ const express = require('express');
 const router = express.Router();
 const template = require('../lib/template.js');
 const check = require('../lib/check.js');
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const adapter = new FileSync('db.json');
-const db = low(adapter);
-db.defaults({users:[]}).write();
 const shortid = require('shortid');
+const db = require('../lib/db.js');
 
 let title = "";
 let list = "";
@@ -67,13 +63,16 @@ router.post(`/register_process`, (request, response) => {
         response.redirect('/auth/register');
     }
     else {
-    db.get('users').push({
+     const user = {
         id : shortid.generate(),
         email : email,
         password : password,
         displayName : displayName
-    }).write();
-    response.redirect('/');
+     };
+     db.get('users').push(user).write();
+    request.login(user, function(err) {
+        return response.redirect('/')
+    })
     }
 });
 
