@@ -29,6 +29,20 @@ router.post('/login_process',
     successFlash:true
   }));
 
+router.get('/register', (request, response) => {
+    title = `web-login`;
+    list = template.List(request.list);
+    html = template.HTML(title,`${check.UI(request,response)}`, list, `<form action="/auth/register_process" method = "post">
+    <p><input type = "text" name = "email" placeholder = "email"></p>
+    <p><input type = "password" name = "password" placeholder="password"></p>
+    <p><input type = "password" name = "password2" placeholder="password2"></p>
+    <p><input type = "text" name = "displayName" placeholder="nickname"></p>
+    <p><input type = "submit" value = "register"></p></form>
+    `,'');
+    
+    response.send(html);
+});
+
 router.get('/logout', (request, response) => {
     request.logout();
     request.session.save(function() {
