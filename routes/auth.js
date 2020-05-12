@@ -7,6 +7,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const adapter = new FileSync('db.json');
 const db = low(adapter);
 db.defaults({users:[]}).write();
+const shortid = require('shortid');
 
 let title = "";
 let list = "";
@@ -35,9 +36,15 @@ router.post('/login_process',
   }));
 
 router.get('/register', (request, response) => {
+    let fmsg = request.flash().error;
+    let feedback ='';
+    if(fmsg)
+    {
+        feedback = fmsg[0];
+    }
     title = `web-login`;
     list = template.List(request.list);
-    html = template.HTML(title,`${check.UI(request,response)}`, list, `<form action="/auth/register_process" method = "post">
+    html = template.HTML(title,`${check.UI(request,response)}`, list, `${feedback}<form action="/auth/register_process" method = "post">
     <p><input type = "text" name = "email" placeholder = "email"></p>
     <p><input type = "password" name = "password" placeholder="password"></p>
     <p><input type = "password" name = "password2" placeholder="password2"></p>
@@ -55,12 +62,19 @@ router.post(`/register_process`, (request, response) => {
     let password2 = post.password2;
     let displayName = post.displayName;
 
+    if(password !== password2) {
+        request.flash('error', '비밀번호가 일치하지 않습니다.')
+        response.redirect('/auth/register');
+    }
+    else {
     db.get('users').push({
+        id : shortid.generate(),
         email : email,
         password : password,
         displayName : displayName
     }).write();
     response.redirect('/');
+    }
 });
 
 router.get('/logout', (request, response) => {
