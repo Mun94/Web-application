@@ -17,14 +17,17 @@ router.get('/', (request, response) => {
         description = 'Hello nodejs';
         list = template.List(request.list);
 
-        const fmsg = request.flash().success;
+        const fmsg = request.flash();
         let feedback = '';
-        if(fmsg)
+        if(fmsg.success)
         {
-           feedback = fmsg[0];
+           feedback = fmsg.success[0];
         } 
+        else if(fmsg.error) {
+           feedback = fmsg.error[0];
+        }
 
-        html = template.HTML(title,`${check.UI(request,response)} ${feedback}`, list,
+        html = template.HTML(title,`${check.UI(request,response)} <div style = "color:red">${feedback}</div>`, list,
         `<a href = "/topic/create">create</a>`, `<h2>${title}</h2>${description} <p>${Date()}</p><p>${request.session.num}</p>`);
         
         response.send(html);

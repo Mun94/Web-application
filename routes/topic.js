@@ -117,12 +117,19 @@ router.post(`/delete_process`, (request, response) => {
     
     let post = request.body;
     let id = post.id;
-
+    let topic = '';
     !check.IS(request,response) ? 
-    response.send(`로그인이 필요합니다.<p><a href="/auth/login">login</a></p>`) : (
-    fs.unlink(`data/${id}`, err => {
-        response.redirect(`/`);
-    }))
+    response.send(`로그인이 필요합니다.<p><a href="/auth/login">login</a></p>`) : 
+    topic = db.get('topics').find({id:id}).value()
+    if(topic.user_id !== request.user.id) {
+        request.flash('error', 'Not yours!');
+        return response.redirect('/')
+    } 
+    db.get('topics').remove({id:id}).write();
+    response.redirect('/')
+    // fs.unlink(`data/${id}`, err => {
+    //     response.redirect(`/`);
+    // })
 })
 
 router.get('/:pageId', (request, response, next) => {
@@ -151,7 +158,7 @@ router.get('/:pageId', (request, response, next) => {
         html = template.HTML(title,`${check.UI(request,response)}`, list,`<a href = "/topic/create">create</a>
         <a href = "/topic/update/${topic.id}">update</a>
         <form action = "/topic/delete_process" method = "post" onsubmit="return confirm('do you want to delete this file?')">
-        <p><input type = "hidden" name="id" value="${sanitizedTitle}"></p>
+        <p><input type = "hidden" name="id" value="${topic.id}"></p>
         <p><input type="submit" value="delete"></p></form>
         `, `<h2>${sanitizedTitle}</h2>${sanitizedDescription}
         <p>by ${user.displayName}</p>
